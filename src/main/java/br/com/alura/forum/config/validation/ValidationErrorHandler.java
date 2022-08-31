@@ -6,6 +6,7 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
+import org.springframework.data.mapping.PropertyReferenceException;
 import org.springframework.http.HttpStatus;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -21,7 +22,7 @@ public class ValidationErrorHandler {
 	
 	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
 	@ExceptionHandler(MethodArgumentNotValidException.class)
-	public List<ValidationErrorDTO> handle(MethodArgumentNotValidException exception) {
+	public List<ValidationErrorDTO> handleMethodArgumentException(MethodArgumentNotValidException exception) {
 		List<ValidationErrorDTO> listErrorsDTO = new ArrayList<>();
 		List<FieldError> fieldErrors = exception.getBindingResult().getFieldErrors();
 		
@@ -32,5 +33,11 @@ public class ValidationErrorHandler {
 		});
 		
 		return listErrorsDTO;
+	}
+	
+	@ResponseStatus(code = HttpStatus.BAD_REQUEST)
+	@ExceptionHandler(PropertyReferenceException.class)
+	public ValidationErrorDTO handlePropertyReferenceException(PropertyReferenceException exception) {		
+		return new ValidationErrorDTO(exception.getPropertyName(), exception.getLocalizedMessage());
 	}
 }
